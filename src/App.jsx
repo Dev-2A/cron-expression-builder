@@ -13,7 +13,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col">
-      <Header />
+      <Header expression={cron.expression} validation={cron.validation} />
 
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-8">
         {/* 크론 표현식 입력 */}
@@ -29,7 +29,6 @@ function App() {
           {/* 왼쪽: GUI 빌더 */}
           <div className="lg:col-span-2 space-y-4">
             <CronBuilder fields={cron.fields} onFieldChange={cron.setField} />
-            {/* 치트시트는 빌더 아래에 */}
             <CheatSheetPanel />
           </div>
 

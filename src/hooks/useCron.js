@@ -3,9 +3,13 @@ import { parseExpression, buildExpression } from "../utils/cronParser";
 import { validateExpression } from "../utils/cronValidator";
 import { getNextExecutions } from "../utils/cronSchedule";
 import { describeExpression } from "../utils/cronDescriptor";
+import { getExprFromUrl, useUrlSync } from "./useUrlSync";
 
 export function useCron(initialExpr = "* * * * *") {
-  const [expression, setExpression] = useState(initialExpr);
+  // URL에 표현식이 있으면 그걸 초기값으로 사용
+  const [expression, setExpression] = useState(() => {
+    return getExprFromUrl() || initialExpr;
+  });
 
   const fields = useMemo(() => parseExpression(expression), [expression]);
 
@@ -19,11 +23,13 @@ export function useCron(initialExpr = "* * * * *") {
     return describeExpression(expression);
   }, [expression, validation.valid]);
 
-  // 최대 20회까지 미리 계산 (컴포넌트에서 slice)
   const nextExecutions = useMemo(() => {
     if (!validation.valid) return [];
     return getNextExecutions(expression, 20);
   }, [expression, validation.valid]);
+
+  // URL 동기화
+  useUrlSync(expression, validation);
 
   const setExpressionDirect = (expr) => {
     setExpression(expr);

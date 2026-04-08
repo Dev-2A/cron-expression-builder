@@ -4,6 +4,7 @@ import CronInput from "./components/Builder/CronInput";
 import CronBuilder from "./components/Builder/CronBuilder";
 import DescriptionPanel from "./components/Preview/DescriptionPanel";
 import ExecutionPreview from "./components/Preview/ExecutionPreview";
+import PresetPanel from "./components/Preset/PresetPanel";
 import { useCron } from "./hooks/useCron";
 
 function App() {
@@ -40,9 +41,7 @@ function App() {
               nextExecutions={cron.nextExecutions}
               validation={cron.validation}
             />
-            <div className="bg-gray-900 rounded-xl border border-gray-800 p-6 text-gray-500 text-sm">
-              ⚡ 프리셋 (Step 9에서 구현)
-            </div>
+            <PresetPanel onSelect={cron.setExpression} />
           </div>
         </div>
       </main>

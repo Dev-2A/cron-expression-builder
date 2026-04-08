@@ -7,16 +7,28 @@ import ExecutionPreview from "./components/Preview/ExecutionPreview";
 import PresetPanel from "./components/Preset/PresetPanel";
 import CheatSheetPanel from "./components/CheatSheet/CheatSheetPanel";
 import { useCron } from "./hooks/useCron";
+import { useTheme } from "./hooks/useTheme";
 
 function App() {
   const cron = useCron("0 9 * * 1");
+  const { theme, toggle: toggleTheme } = useTheme();
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col">
-      <Header expression={cron.expression} validation={cron.validation} />
+    <div
+      className="min-h-screen flex flex-col transition-colors"
+      style={{
+        backgroundColor: "var(--bg-primary)",
+        color: "var(--text-primary)",
+      }}
+    >
+      <Header
+        expression={cron.expression}
+        validation={cron.validation}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+      />
 
-      <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-8">
-        {/* 크론 표현식 입력 */}
+      <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-6 sm:py-8">
         <CronInput
           expression={cron.expression}
           validation={cron.validation}
@@ -24,15 +36,12 @@ function App() {
           onChange={cron.setExpression}
         />
 
-        {/* 메인 그리드 */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          {/* 왼쪽: GUI 빌더 */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8">
           <div className="lg:col-span-2 space-y-4">
             <CronBuilder fields={cron.fields} onFieldChange={cron.setField} />
             <CheatSheetPanel />
           </div>
 
-          {/* 오른쪽: 설명 + 미리보기 + 프리셋 */}
           <div className="space-y-4">
             <DescriptionPanel
               expression={cron.expression}

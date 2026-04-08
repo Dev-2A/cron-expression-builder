@@ -1,28 +1,38 @@
 import ShareButton from "./ShareButton";
+import ThemeToggle from "./ThemeToggle";
 
-export default function Header({ expression, validation }) {
+export default function Header({
+  expression,
+  validation,
+  theme,
+  onToggleTheme,
+}) {
   return (
-    <header className="border-b border-gray-800 bg-gray-950/80 backdrop-blur-sm sticky top-0 z-50">
+    <header
+      className="theme-border border-b backdrop-blur-sm sticky top-0 z-50"
+      style={{ backgroundColor: "var(--bg-primary)", opacity: 0.95 }}
+    >
       <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="text-2xl">⏰</span>
           <div>
-            <h1 className="text-lg font-bold text-gray-100 leading-tight">
+            <h1 className="text-lg font-bold leading-tight theme-text-primary">
               Cron Expression Builder
             </h1>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs theme-text-muted hidden sm:block">
               GUI로 조합하고, 자연어로 확인하는 크론 표현식 도구
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <ShareButton expression={expression} validation={validation} />
+          <ThemeToggle theme={theme} onToggle={onToggleTheme} />
           <a
             href="https://github.com/Dev-2A/cron-expression-builder"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-500 hover:text-gray-300 transition-colors"
+            className="p-2 rounded-lg theme-text-muted hover:theme-text-secondary transition-colors"
             aria-label="GitHub"
           >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

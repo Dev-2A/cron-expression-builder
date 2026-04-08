@@ -5,6 +5,7 @@ import CronBuilder from "./components/Builder/CronBuilder";
 import DescriptionPanel from "./components/Preview/DescriptionPanel";
 import ExecutionPreview from "./components/Preview/ExecutionPreview";
 import PresetPanel from "./components/Preset/PresetPanel";
+import CheatSheetPanel from "./components/CheatSheet/CheatSheetPanel";
 import { useCron } from "./hooks/useCron";
 
 function App() {
@@ -26,8 +27,10 @@ function App() {
         {/* 메인 그리드 */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           {/* 왼쪽: GUI 빌더 */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 space-y-4">
             <CronBuilder fields={cron.fields} onFieldChange={cron.setField} />
+            {/* 치트시트는 빌더 아래에 */}
+            <CheatSheetPanel />
           </div>
 
           {/* 오른쪽: 설명 + 미리보기 + 프리셋 */}

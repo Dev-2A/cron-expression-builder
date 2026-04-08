@@ -1,17 +1,30 @@
 import { useState, useEffect } from "react";
-import { FIELD_RANGES, FIELD_TYPES } from "../../constants/cronFields";
+import {
+  FIELD_RANGES,
+  FIELD_TYPES,
+  MONTH_NAMES,
+  DAY_NAMES,
+} from "../../constants/cronFields";
 import { parseFieldValue, buildFieldValue } from "../../utils/cronParser";
+
+/**
+ * 필드별 표시 라벨 결정
+ * month → "1월", "2월" ...  /  dayOfWeek → "일", "월" ...  /  나머지 → "00", "01" ...
+ */
+function getDisplayLabel(fieldName, num) {
+  if (fieldName === "month") return MONTH_NAMES[num] || String(num);
+  if (fieldName === "dayOfWeek") return DAY_NAMES[num] || String(num);
+  return String(num).padStart(2, "0");
+}
 
 export default function FieldSelector({ fieldName, label, value, onChange }) {
   const range = FIELD_RANGES[fieldName];
   const [parsed, setParsed] = useState(() => parseFieldValue(value));
 
-  // 외부에서 value가 변경되면 (양방향 동기화) parsed도 갱신
   useEffect(() => {
     setParsed(parseFieldValue(value));
   }, [value]);
 
-  // parsed가 변경되면 부모에게 문자열 값 전달
   const updateField = (newParsed) => {
     setParsed(newParsed);
     onChange(buildFieldValue(newParsed));
@@ -32,13 +45,12 @@ export default function FieldSelector({ fieldName, label, value, onChange }) {
           end: Math.min(range.min + 5, range.max),
         });
         break;
-      case FIELD_TYPES.STEP:
-        updateField({
-          type,
-          start: "*",
-          step: range.fieldName === "munute" ? 5 : 1,
-        });
+      case FIELD_TYPES.STEP: {
+        const defaultStep =
+          fieldName === "minute" ? 5 : fieldName === "hour" ? 2 : 1;
+        updateField({ type, start: "*", step: defaultStep });
         break;
+      }
       default:
         updateField({ type: FIELD_TYPES.EVERY });
     }
@@ -87,6 +99,7 @@ export default function FieldSelector({ fieldName, label, value, onChange }) {
 
         {parsed.type === FIELD_TYPES.SPECIFIC && (
           <SpecificInput
+            fieldName={fieldName}
             range={range}
             values={parsed.values || []}
             onChange={(values) => updateField({ ...parsed, values })}
@@ -95,6 +108,7 @@ export default function FieldSelector({ fieldName, label, value, onChange }) {
 
         {parsed.type === FIELD_TYPES.RANGE && (
           <RangeInput
+            fieldName={fieldName}
             range={range}
             start={parsed.start ?? range.min}
             end={parsed.end ?? range.max}
@@ -116,7 +130,7 @@ export default function FieldSelector({ fieldName, label, value, onChange }) {
 }
 
 /* ─── 특정 값 선택 (토글 버튼 그리드) ─── */
-function SpecificInput({ range, values, onChange }) {
+function SpecificInput({ fieldName, range, values, onChange }) {
   const allValues = Array.from(
     { length: range.max - range.min + 1 },
     (_, i) => range.min + i,
@@ -131,19 +145,24 @@ function SpecificInput({ range, values, onChange }) {
     }
   };
 
+  // 월/요일은 넓은 버튼, 분은 좁은 그리드
+  const isWide = fieldName === "month" || fieldName === "dayOfWeek";
+
   return (
-    <div className="flex flex-wrap gap-1.5">
+    <div className={`flex flex-wrap gap-1.5 ${isWide ? "gap-2" : ""}`}>
       {allValues.map((num) => (
         <button
           key={num}
           onClick={() => toggle(num)}
-          className={`w-9 h-8 text-xs rounded-md font-mono transition-colors ${
+          className={`h-8 text-xs rounded-md font-mono transition-colors ${
+            isWide ? "px-3 min-w-12" : "w-9"
+          } ${
             values.includes(num)
               ? "bg-blue-500 text-white"
               : "bg-gray-800 text-gray-500 hover:text-gray-300 hover:bg-gray-700"
           }`}
         >
-          {String(num).padStart(2, "0")}
+          {getDisplayLabel(fieldName, num)}
         </button>
       ))}
     </div>
@@ -151,7 +170,50 @@ function SpecificInput({ range, values, onChange }) {
 }
 
 /* ─── 범위 선택 (start ~ end) ─── */
-function RangeInput({ range, start, end, onChange }) {
+function RangeInput({ fieldName, range, start, end, onChange }) {
+  // 요일/월은 셀렉트, 나머지는 숫자 입력
+  const useSelect = fieldName === "month" || fieldName === "dayOfWeek";
+  const allValues = Array.from(
+    { length: range.max - range.min + 1 },
+    (_, i) => range.min + i,
+  );
+
+  if (useSelect) {
+    return (
+      <div className="flex items-center gap-3">
+        <div className="flex-1">
+          <label className="text-xs text-gray-500 mb-1 block">시작</label>
+          <select
+            value={start}
+            onChange={(e) => onChange(Number(e.target.value), end)}
+            className="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-blue-500"
+          >
+            {allValues.map((num) => (
+              <option key={num} value={num}>
+                {getDisplayLabel(fieldName, num)}
+              </option>
+            ))}
+          </select>
+        </div>
+        <span className="text-gray-600 mt-5">~</span>
+        <div className="flex-1">
+          <label className="text-xs text-gray-500 mb-1 block">종료</label>
+          <select
+            value={end}
+            onChange={(e) => onChange(start, Number(e.target.value))}
+            className="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-blue-500"
+          >
+            {allValues.map((num) => (
+              <option key={num} value={num}>
+                {getDisplayLabel(fieldName, num)}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center gap-3">
       <div className="flex-1">
@@ -187,10 +249,9 @@ function StepInput({ range, start, step, onChange }) {
 
   return (
     <div className="space-y-3">
-      {/* 시작점 토글 */}
       <div className="flex items-center gap-2">
         <button
-          onClick={() => onChange(isAll ? String(range.min) : "*", step)}
+          onClick={() => onChange("*", step)}
           className={`text-xs px-3 py-1 rounded-md transition-colors ${
             isAll
               ? "bg-blue-500 text-white"
@@ -200,7 +261,7 @@ function StepInput({ range, start, step, onChange }) {
           처음부터
         </button>
         <button
-          onClick={() => onChange(isAll ? String(range.min) : "*", step)}
+          onClick={() => onChange(String(range.min), step)}
           className={`text-xs px-3 py-1 rounded-md transition-colors ${
             !isAll
               ? "bg-blue-500 text-white"

@@ -3,6 +3,7 @@ import Footer from "./components/Layout/Footer";
 import CronInput from "./components/Builder/CronInput";
 import CronBuilder from "./components/Builder/CronBuilder";
 import DescriptionPanel from "./components/Preview/DescriptionPanel";
+import ExecutionPreview from "./components/Preview/ExecutionPreview";
 import { useCron } from "./hooks/useCron";
 
 function App() {
@@ -35,9 +36,10 @@ function App() {
               description={cron.description}
               validation={cron.validation}
             />
-            <div className="bg-gray-900 rounded-xl border border-gray-800 p-6 text-gray-500 text-sm">
-              📋 실행 시간 미리보기 (Step 8에서 구현)
-            </div>
+            <ExecutionPreview
+              nextExecutions={cron.nextExecutions}
+              validation={cron.validation}
+            />
             <div className="bg-gray-900 rounded-xl border border-gray-800 p-6 text-gray-500 text-sm">
               ⚡ 프리셋 (Step 9에서 구현)
             </div>

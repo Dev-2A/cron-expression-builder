@@ -19,17 +19,16 @@ export function useCron(initialExpr = "* * * * *") {
     return describeExpression(expression);
   }, [expression, validation.valid]);
 
+  // 최대 20회까지 미리 계산 (컴포넌트에서 slice)
   const nextExecutions = useMemo(() => {
     if (!validation.valid) return [];
-    return getNextExecutions(expression, 10);
+    return getNextExecutions(expression, 20);
   }, [expression, validation.valid]);
 
-  /** 전체 표현식을 직접 변경 */
   const setExpressionDirect = (expr) => {
     setExpression(expr);
   };
 
-  /** 개별 필드를 변경하면 전체 표현식 재조합 */
   const setField = (fieldName, value) => {
     const newFields = { ...fields, [fieldName]: value };
     setExpression(buildExpression(newFields));

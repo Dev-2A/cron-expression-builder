@@ -1,4 +1,4 @@
-import { parseExpression as cronParseExpression } from "cron-parser";
+import { CronExpressionParser } from "cron-parser";
 
 /**
  * 다음 N회 실행 시간을 계산
@@ -8,8 +8,8 @@ import { parseExpression as cronParseExpression } from "cron-parser";
  */
 export function getNextExecutions(expr, count = 10) {
   try {
-    const interval = cronParseExpression(expr, {
-      currentData: new Date(),
+    const interval = CronExpressionParser.parse(expr, {
+      currentDate: new Date(),
       tz: "Asia/Seoul",
     });
 
@@ -18,7 +18,25 @@ export function getNextExecutions(expr, count = 10) {
       dates.push(interval.next().toDate());
     }
     return dates;
-  } catch {
+  } catch (e) {
+    // v4 이전 API fallback
+    try {
+      const mod = require("cron-parser");
+      const fn = mod.parseExpression || mod.default?.parseExpression;
+      if (fn) {
+        const interval = fn(expr, {
+          currentDate: new Date(),
+          tz: "Asia/Seoul",
+        });
+        const dates = [];
+        for (let i = 0; i < count; i++) {
+          dates.push(interval.next().toDate());
+        }
+        return dates;
+      }
+    } catch {
+      /* ignore */
+    }
     return [];
   }
 }

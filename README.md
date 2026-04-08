@@ -72,11 +72,11 @@ src/
 
 ### 다크 모드
 
-![dark](https://via.placeholder.com/800x450/030712/60a5fa?text=Dark+Mode)
+![dark](./docs/dark.png)
 
 ### 라이트 모드
 
-![light](https://via.placeholder.com/800x450/ffffff/2563eb?text=Light+Mode)
+![light](./docs/light.png)
 
 > 실제 스크린샷으로 교체 예정
 

@@ -12,23 +12,13 @@ function App() {
       <Header />
 
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-8">
-        {/* 크론 표현식 입력 */}
-        <CronInput expression={cron.expression} onChange={cron.setExpression} />
-
-        {/* 유효성 + 자연어 설명 */}
-        <div className="mt-4 space-y-2">
-          {cron.validation.valid ? (
-            <p className="text-sm text-green-400">✅ {cron.description}</p>
-          ) : (
-            <div className="space-y-1">
-              {cron.validation.errors.map((err, i) => (
-                <p key={i} className="text-sm text-red-400">
-                  ❌ {err}
-                </p>
-              ))}
-            </div>
-          )}
-        </div>
+        {/* 크론 표현식 입력 (유효성 + 설명 통합) */}
+        <CronInput
+          expression={cron.expression}
+          validation={cron.validation}
+          description={cron.description}
+          onChange={cron.setExpression}
+        />
 
         {/* 메인 그리드 */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
